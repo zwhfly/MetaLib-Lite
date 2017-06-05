@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <CleanDependsOn>MOCClean;QRCClean;UICClean;TSCClean;$(CleanDependsOn);</CleanDependsOn>
+    <DISABLEFASTUPTODATECHECK>true</DISABLEFASTUPTODATECHECK>
+  </PropertyGroup>
+  <Target Name="MOC" BeforeTargets="ClCompile" Inputs="@(MOC)" Outputs="@(MOC->'$(IntermediateOutputPath)moc_%(Filename).cpp')" >
+    <PropertyGroup>
+      <MocFlags>$([System.String]::new(';%(ClCompile.PreprocessorDefinitions)').Replace(';',' ').TrimEnd().Replace(' ',' -D')) -D_MSC_VER=$(QtBuild__MSC_VER) -I$(QtBuild_MkspecDir) -I$(QtBuild_QtHome)\include</MocFlags>
+    </PropertyGroup>
+    <ItemGroup>
+      <ClCompile Include="@(MOC->'$(IntermediateOutputPath)moc_%(Filename).cpp')" />
+    </ItemGroup>
+    <Message Importance="High" Text="MOC %(MOC.Identity)" />
+    <Exec Command="moc.exe $(MocFlags) %(MOC.FullPath) -o $(IntermediateOutputPath)moc_%(MOC.Filename).cpp"/>
+  </Target>
+  <Target Name="MOCClean">
+    <Delete Files="@(MOC->'$(IntermediateOutputPath)moc_%(Filename).cpp')" />
+  </Target>
+  <Target Name="QRC" BeforeTargets="ClCompile" Inputs="@(QRC)" Outputs="@(QRC->'$(IntermediateOutputPath)qrc_%(Filename).cpp')" >
+    <ItemGroup>
+      <ClCompile Include="@(QRC->'$(IntermediateOutputPath)qrc_%(Filename).cpp')" />
+    </ItemGroup>
+    <Message Importance="High" Text="RCC %(QRC.Identity)" />
+    <Exec Command="rcc.exe -name %(QRC.Filename) %(QRC.FullPath) -o $(IntermediateOutputPath)\qrc_%(QRC.Filename).cpp"/>
+  </Target>
+  <Target Name="QRCClean">
+    <Delete Files="@(QRC->'$(IntermediateOutputPath)qrc_%(Filename).cpp')" />
+  </Target>
+  <Target Name="UIC" BeforeTargets="ClCompile" Inputs="@(UIC)" Outputs="@(UIC->'$(IntermediateOutputPath)ui_%(Filename).h')" >
+    <ItemGroup>
+      <ClInclude Include="@(UIC->'$(IntermediateOutputPath)ui_%(Filename).h')" />
+    </ItemGroup>
+    <Message Importance="High" Text="UIC %(UIC.Identity)" />
+    <Exec Command="uic.exe %(UIC.FullPath) -o $(IntermediateOutputPath)\ui_%(UIC.Filename).h"/>
+  </Target>
+  <Target Name="UICClean">
+    <Delete Files="@(UIC->'$(IntermediateOutputPath)ui_%(Filename).h')" />
+  </Target>
+  <Target Name="TSC" BeforeTargets="ClCompile" Inputs="@(TSC)" Outputs="@(TSC->'$(IntermediateOutputPath)%(Filename).qm')" >
+    <Message Importance="High" Text="TSC %(TSC.Identity)" />
+    <Exec Command="xcopy /T /E %(TSC.FullPath) $(IntermediateOutputPath)%(TSC.RelativeDir)"/>
+    <Exec Command="lrelease.exe %(TSC.FullPath) -qm $(IntermediateOutputPath)%(TSC.RelativeDir)%(TSC.Filename).qm"/>
+  </Target>
+  <Target Name="TSCClean">
+    <Delete Files="@(TSC->'$(IntermediateOutputPath)%(Filename).qm')" />
+  </Target>
+</Project>

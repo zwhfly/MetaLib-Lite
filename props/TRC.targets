@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <CleanDependsOn>TRCClean;$(CleanDependsOn);</CleanDependsOn>
+    <DISABLEFASTUPTODATECHECK>true</DISABLEFASTUPTODATECHECK>
+  </PropertyGroup>
+  <Target Name="TRC" BeforeTargets="ClCompile" Inputs="@(TRC)" Outputs="@(TRC->'$(IntermediateOutputPath)trc_%(Identity).cpp')" >
+    <ItemGroup>
+      <ClCompile Include="@(TRC->'$(IntermediateOutputPath)trc_%(Identity).cpp')" />
+    </ItemGroup>
+    <Message Importance="High" Text="TRC %(TRC.Identity)" />
+    <Exec Command="trc.exe -n $([System.String]::new('%(TRC.Identity)').Replace('.','_')) -o $(IntermediateOutputPath)\trc_%(TRC.Identity).cpp %(TRC.FullPath)"/>
+  </Target>
+  <Target Name="TRCClean">
+    <Delete Files="@(TRC->'$(IntermediateOutputPath)trc_%(Identity).cpp')" />
+  </Target>
+</Project>
